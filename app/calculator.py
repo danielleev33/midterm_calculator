@@ -11,6 +11,14 @@ class Calculator:
         self.history = History()
         self.undo_stack = []
         self.redo_stack = []
+        self.observers = []
+
+    def add_observer(self, observer):
+        self.observers.append(observer)
+
+    def notify_observers(self, calculation):
+        for observer in self.observers:
+            observer.update(calculation, self.history)
 
     def _save_state(self):
         memento = CalculatorMemento(self.history.get_history())
@@ -29,6 +37,7 @@ class Calculator:
 
         calculation = Calculation(operation_name, a, b, result)
         self.history.add_calculation(calculation)
+        self.notify_observers(calculation)
 
         return result
 

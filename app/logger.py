@@ -21,3 +21,23 @@ def get_logger():
         logger.addHandler(file_handler)
 
     return logger
+
+
+class LoggingObserver:
+    def __init__(self):
+        self.logger = get_logger()
+
+    def update(self, calculation, history):
+        self.logger.info(
+            "Performed %s on %s and %s -> %s",
+            calculation.operation,
+            calculation.operand1,
+            calculation.operand2,
+            calculation.result,
+        )
+
+
+class AutoSaveObserver:
+    def update(self, calculation, history):
+        if CalculatorConfig.AUTO_SAVE:
+            history.save_to_csv()
