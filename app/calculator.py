@@ -184,5 +184,5 @@ def run_repl():
             print(f"Error: {exc}")
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     run_repl()

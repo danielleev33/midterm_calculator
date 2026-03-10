@@ -27,7 +27,8 @@ class History:
 
         try:
             data = [calc.to_dict() for calc in self.history]
-            df = pd.DataFrame(data)
+            df = pd.DataFrame(
+                data, columns=["operation", "operand1", "operand2", "result", "timestamp"])
             df.to_csv(file_path, index=False, encoding=CalculatorConfig.DEFAULT_ENCODING)
         except Exception as exc:
             raise HistoryError(f"Failed to save history to CSV: {exc}") from exc

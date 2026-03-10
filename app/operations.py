@@ -5,7 +5,7 @@ class Operation(ABC):
     @abstractmethod
     def execute(self, a, b):
         """Execute the operation on two numeric inputs."""
-        pass
+        pass  # pragma: no cover
 
 
 class Add(Operation):

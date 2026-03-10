@@ -67,3 +67,57 @@ def test_load_invalid_csv(tmp_path):
 
     with pytest.raises(HistoryError):
         history.load_from_csv(file_path)
+
+
+def test_history_respects_max_size(monkeypatch):
+    from app.calculator_config import CalculatorConfig
+
+    monkeypatch.setattr(CalculatorConfig, "MAX_HISTORY_SIZE", 2)
+
+    history = History()
+    history.add_calculation(Calculation("add", 1, 1, 2))
+    history.add_calculation(Calculation("add", 2, 2, 4))
+    history.add_calculation(Calculation("add", 3, 3, 6))
+
+    saved = history.get_history()
+    assert len(saved) == 2
+    assert saved[0].operand1 == 2
+    assert saved[1].operand1 == 3
+
+
+def test_save_to_csv_raises_history_error(monkeypatch):
+    history = History()
+    history.add_calculation(Calculation("add", 2, 3, 5))
+
+    def bad_to_csv(*args, **kwargs):
+        raise Exception("save failed")
+
+    monkeypatch.setattr("pandas.DataFrame.to_csv", bad_to_csv)
+
+    with pytest.raises(HistoryError):
+        history.save_to_csv("fake.csv")
+
+
+def test_load_from_csv_raises_history_error_for_bad_read(monkeypatch):
+    history = History()
+
+    def bad_read_csv(*args, **kwargs):
+        raise Exception("read failed")
+
+    monkeypatch.setattr("pandas.read_csv", bad_read_csv)
+    monkeypatch.setattr("os.path.exists", lambda path: True)
+
+    with pytest.raises(HistoryError):
+        history.load_from_csv("fake.csv")
+
+
+def test_save_and_load_empty_history(tmp_path):
+    history = History()
+    file_path = tmp_path / "empty_history.csv"
+
+    history.save_to_csv(file_path)
+
+    new_history = History()
+    new_history.load_from_csv(file_path)
+
+    assert new_history.get_history() == []

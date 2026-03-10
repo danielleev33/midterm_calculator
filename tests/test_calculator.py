@@ -1,4 +1,6 @@
 from app.calculator import Calculator
+import pytest
+from app.exceptions import ValidationError, OperationError
 
 
 def test_calculate_add():
@@ -59,3 +61,21 @@ def test_undo_empty():
 def test_redo_empty():
     calculator = Calculator()
     assert calculator.redo() is False
+
+
+def test_calculate_invalid_input():
+    calculator = Calculator()
+    with pytest.raises(ValidationError):
+        calculator.calculate("add", "abc", 3)
+
+
+def test_calculate_input_exceeds_max():
+    calculator = Calculator()
+    with pytest.raises(ValidationError):
+        calculator.calculate("add", 1000000000, 1)
+
+
+def test_calculate_divide_by_zero():
+    calculator = Calculator()
+    with pytest.raises(OperationError):
+        calculator.calculate("divide", 10, 0)
