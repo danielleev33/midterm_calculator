@@ -4,6 +4,7 @@ from app.calculator_memento import CalculatorMemento
 from app.history import History
 from app.input_validators import validate_number
 from app.operations import OperationFactory
+from app.logger import LoggingObserver, AutoSaveObserver
 
 
 class Calculator:
@@ -78,3 +79,110 @@ class Calculator:
         self._save_state()
         self.redo_stack.clear()
         self.history.load_from_csv(file_path)
+
+
+def run_repl():
+    calculator = Calculator()
+    calculator.add_observer(LoggingObserver())
+    calculator.add_observer(AutoSaveObserver())
+
+    commands = {
+        "add",
+        "subtract",
+        "multiply",
+        "divide",
+        "power",
+        "root",
+        "modulus",
+        "int_divide",
+        "percent",
+        "abs_diff",
+    }
+
+    print("Advanced Calculator REPL")
+    print("Type 'help' for available commands.")
+
+    while True:
+        try:
+            user_input = input(">>> ").strip()
+
+            if not user_input:
+                continue
+
+            parts = user_input.split()
+            command = parts[0].lower()
+
+            if command == "exit":
+                print("Exiting calculator. Goodbye!")
+                break
+
+            elif command == "help":
+                print("Available commands:")
+                print("  add a b")
+                print("  subtract a b")
+                print("  multiply a b")
+                print("  divide a b")
+                print("  power a b")
+                print("  root a b")
+                print("  modulus a b")
+                print("  int_divide a b")
+                print("  percent a b")
+                print("  abs_diff a b")
+                print("  history")
+                print("  clear")
+                print("  undo")
+                print("  redo")
+                print("  save")
+                print("  load")
+                print("  help")
+                print("  exit")
+
+            elif command in commands:
+                if len(parts) != 3:
+                    print(f"Usage: {command} <a> <b>")
+                    continue
+
+                result = calculator.calculate(command, parts[1], parts[2])
+                print(f"Result: {result}")
+
+            elif command == "history":
+                history = calculator.get_history()
+                if not history:
+                    print("History is empty.")
+                else:
+                    for calc in history:
+                        print(calc)
+
+            elif command == "clear":
+                calculator.clear_history()
+                print("History cleared.")
+
+            elif command == "undo":
+                if calculator.undo():
+                    print("Undo successful.")
+                else:
+                    print("Nothing to undo.")
+
+            elif command == "redo":
+                if calculator.redo():
+                    print("Redo successful.")
+                else:
+                    print("Nothing to redo.")
+
+            elif command == "save":
+                calculator.save_history()
+                print("History saved successfully.")
+
+            elif command == "load":
+                calculator.load_history()
+                print("History loaded successfully.")
+
+            else:
+                print("Unknown command. Type 'help' for available commands.")
+
+        except Exception as exc:
+            print(f"Error: {exc}")
+
+
+if __name__ == "__main__":
+    run_repl()
